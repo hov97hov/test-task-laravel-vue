@@ -1,13 +1,32 @@
-import Vue from 'vue'
-import { createInertiaApp } from '@inertiajs/inertia-vue'
+require('./bootstrap');
 
-createInertiaApp({
-    resolve: name => require(`./Pages/${name}`),
-    setup({ el, App, props, plugin }) {
-        Vue.use(plugin)
+// Import modules...
+import Vue from 'vue';
+import { App as InertiaApp, plugin as InertiaPlugin } from '@inertiajs/inertia-vue';
 
-        new Vue({
-            render: h => h(App, props),
-        }).$mount(el)
+import Vuetify from "vuetify";
+import 'vuetify/dist/vuetify.min.css';
+import '@mdi/font/css/materialdesignicons.css'
+
+Vue.use(InertiaPlugin);
+Vue.use(Vuetify);
+
+const app = document.getElementById('app');
+
+export default new Vuetify({
+    icons: {
+        iconfont: 'mdi', // default - only for display purposes
     },
 })
+
+new Vue({
+    vuetify: new Vuetify(),
+    render: (h) =>
+        h(InertiaApp, {
+            props: {
+                initialPage: JSON.parse(app.dataset.page),
+                resolveComponent: (name) => require(`./Pages/${name}`).default,
+            },
+        }),
+}).$mount(app);
+

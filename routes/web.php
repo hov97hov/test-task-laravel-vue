@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +16,22 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/create-post', [PostController::class, 'CreatePost'])->name('CreatePost');
-Route::post('/save-post', [PostController::class, 'savePost'])->name('savePost');
-Route::post('/get-posts', [PostController::class, 'getPosts'])->name('getPosts');
-Route::get('/update-post/{id}', [PostController::class, 'updatePost'])->name('updatePost');
-Route::post('/update-post', [PostController::class, 'editPost'])->name('editPost');
+
+//login
+Route::get('/login', [LoginController::class, 'loginPage'])->name('loginPage');
+Route::get('/register', [LoginController::class, 'register'])->name('register');
+
+//Groups
+Route::get('/groups', [GroupsController::class, 'index'])->name('index.groups');
+Route::get('/group/{id}', [GroupsController::class, 'groupPage'])->name('group');
+
+//Users
+Route::get('/users', [UsersController::class, 'index'])->name('index.users');
+Route::get('/user/{id}', [UsersController::class, 'userPage'])->name('userPage');
+
+Route::middleware(['auth'])->group(function () {
+
+});

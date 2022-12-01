@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,11 +14,10 @@ class HomeController extends Controller
         return Inertia::render('Home');
     }
 
-
-    public function index2(): Response
+    public function getUsers(): \Illuminate\Http\JsonResponse
     {
-        return Inertia::render('Blog', [
-            'event' => 'anausun',
+        return \response()->json([
+            'users' => User::all()
         ]);
     }
 }
