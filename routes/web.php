@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
@@ -27,10 +28,9 @@ Route::get('/register', [LoginController::class, 'register'])->name('register');
 //Groups
 Route::get('/groups', [GroupsController::class, 'index'])->name('index.groups');
 Route::get('/group/{id}', [GroupsController::class, 'groupPage'])->name('group');
-
-//Users
-Route::get('/users', [UsersController::class, 'index'])->name('index.users');
-Route::get('/user/{id}', [UsersController::class, 'userPage'])->name('userPage');
+//contacts
+Route::get('/contacts', [ContactController::class, 'index'])->name('index.contacts');
+Route::get('/add-contact', [ContactController::class, 'createContactPage'])->name('createContactPage');
 
 Route::middleware(['auth'])->group(function () {
 

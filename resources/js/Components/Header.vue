@@ -30,7 +30,7 @@
                             </a>
                         </div>
                         <div class="menu-btns">
-                            <a href="/users">
+                            <a href="/contacts">
                                 <v-btn
                                     @click="openLogoutModal"
                                     class="menu-btn"

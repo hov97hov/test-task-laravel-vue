@@ -2,27 +2,17 @@
 
 namespace App\Providers;
 
+use App\Interfaces\Contact\ContactInterface;
+use App\Interfaces\Group\GroupInterface;
+use App\Service\Contact\ContactService;
+use App\Service\Group\GroupService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
+    public $singletons = [
+        ContactInterface::class => ContactService::class,
+        GroupInterface::class => GroupService::class,
+    ];
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
 }

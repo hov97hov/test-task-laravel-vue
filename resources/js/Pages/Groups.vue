@@ -13,11 +13,11 @@
                         </v-btn>
                     </div>
                     <div class="group-items">
-                        <div class="group-item" v-for="item in 20">
+                        <div class="group-item" v-for="item in groupsData" :style="`border: 3px solid ${item.color}`">
                             <div class="group-item-header">
                                 <div class="group-title">
-                                    <a :href="`/group/${item}`">
-                                        <h3><b>Company {{item}}</b></h3>
+                                    <a :href="`/group/${item.id}`">
+                                        <h3><b>{{item.name}}</b></h3>
                                     </a>
                                 </div>
                                 <div class="send-group-message">
@@ -29,9 +29,9 @@
                                         <v-icon>mdi-email-outline</v-icon>
                                     </v-btn>
                                     <v-btn
+                                        @click="deleteGroupDialog(item.id)"
                                         dark
                                         class="ml-1 delete-btn"
-                                        @click="deleteDialog = true"
                                         small
                                     >
                                         <v-icon>mdi-close</v-icon>
@@ -45,7 +45,7 @@
                             </div>
                             <div class="group-btn-content">
                                 <v-btn
-                                    @click="addUserGroupDialog = true"
+                                    @click="addContactDialog(item.id)"
                                     small
                                     dark
                                     color="green accent-4"
@@ -134,7 +134,7 @@
                     <v-btn
                         color="deep-orange darken-2"
                         text
-                        @click="deleteDialog = false"
+                        @click="deleteGroup"
                     >
                         Ջնջել
                     </v-btn>
@@ -154,90 +154,40 @@
                 <v-card-text>
                     <v-container>
                         <v-row>
-                            <v-col
-                                cols="12"
-                                sm="6"
-                                md="4"
-                            >
+                            <v-col cols="12" sm="12" md="12">
                                 <v-text-field
-                                    label="Legal first name*"
+                                    v-model="defaultDataGroup.name"
+                                    label="Անուն"
                                     required
                                 ></v-text-field>
                             </v-col>
-                            <v-col
-                                cols="12"
-                                sm="6"
-                                md="4"
-                            >
-                                <v-text-field
-                                    label="Legal middle name"
-                                    hint="example of helper text only on focus"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col
-                                cols="12"
-                                sm="6"
-                                md="4"
-                            >
-                                <v-text-field
-                                    label="Legal last name*"
-                                    hint="example of persistent helper text"
-                                    persistent-hint
-                                    required
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field
-                                    label="Email*"
-                                    required
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field
-                                    label="Password*"
-                                    type="password"
-                                    required
-                                ></v-text-field>
-                            </v-col>
-                            <v-col
-                                cols="12"
-                                sm="6"
-                            >
-                                <v-select
-                                    :items="['0-17', '18-29', '30-54', '54+']"
-                                    label="Age*"
-                                    required
-                                ></v-select>
-                            </v-col>
-                            <v-col
-                                cols="12"
-                                sm="6"
-                            >
-                                <v-autocomplete
-                                    :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
-                                    label="Interests"
-                                    multiple
-                                ></v-autocomplete>
+                            <v-col cols="12" sm="12" md="12">
+                                <p>Ընտրել գույն</p>
+                                <v-color-picker
+                                    v-model="defaultDataGroup.color"
+                                    dot-size="10"
+                                    mode="hexa"
+                                    swatches-max-height="50"
+                                ></v-color-picker>
                             </v-col>
                         </v-row>
                     </v-container>
-                    <small>*indicates required field</small>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                        color="blue darken-1"
+                        color="red darken-1"
                         text
                         @click="addGroupsDialog = false"
                     >
-                        Close
+                        Չեղարկել
                     </v-btn>
                     <v-btn
-                        color="blue darken-1"
+                        color="green darken-1"
                         text
-                        @click="addGroupsDialog = false"
+                        @click="createGroup"
                     >
-                        Save
+                        Հաստատել
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -250,12 +200,12 @@
         >
             <v-card>
                 <v-card-title>
-                    <span class="text-h5">Ստեղծել խումբ</span>
+                    <span class="text-h5">Ավելացնել օգտատեր տվյալ խմբում</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
                         <v-autocomplete
-                            v-model="friends"
+                            v-model="contacts"
                             :disabled="isUpdating"
                             :items="people"
                             filled
@@ -263,7 +213,7 @@
                             color="blue-grey lighten-2"
                             label="Ընտրել"
                             item-text="name"
-                            item-value="name"
+                            item-value="id"
                             multiple
                         >
                             <template v-slot:selection="data">
@@ -275,7 +225,7 @@
                                     @click:close="remove(data.item)"
                                 >
                                     <v-avatar left>
-                                        <v-img :src="data.item.avatar"></v-img>
+                                        <v-img src="/images/user/user.png"></v-img>
                                     </v-avatar>
                                     {{ data.item.name }}
                                 </v-chip>
@@ -286,11 +236,10 @@
                                 </template>
                                 <template v-else>
                                     <v-list-item-avatar>
-                                        <img :src="data.item.avatar">
+                                        <img style="object-fit: cover" src="/images/user/user.png">
                                     </v-list-item-avatar>
                                     <v-list-item-content>
                                         <v-list-item-title v-html="data.item.name"></v-list-item-title>
-                                        <v-list-item-subtitle v-html="data.item.group"></v-list-item-subtitle>
                                     </v-list-item-content>
                                 </template>
                             </template>
@@ -300,22 +249,24 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                        color="blue darken-1"
+                        color="red darken-1"
                         text
                         @click="addUserGroupDialog = false"
                     >
-                        Close
+                        Չեղարկել
                     </v-btn>
                     <v-btn
-                        color="blue darken-1"
+                        color="green darken-1"
                         text
-                        @click="addUserGroupDialog = false"
+                        @click="addContactGroup"
                     >
-                        Save
+                        Հաստատել
                     </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <!--NOTIFICATION-->
+        <notifications group="auth"/>
     </v-app>
 </template>
 
@@ -331,34 +282,19 @@ export default {
         VueEditor
     },
     data: () => {
-        const srcs = {
-            1: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-            2: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-            3: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
-            4: 'https://cdn.vuetifyjs.com/images/lists/4.jpg',
-            5: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-        }
         return {
-            //
+            groupId: '',
+            defaultDataGroup: {
+                color: '',
+                name: '',
+            },
             autoUpdate: true,
-            friends: ['Sandra Adams', 'Britta Holt'],
+            contacts: [],
             isUpdating: false,
             name: 'Midnight Crew',
             people: [
-                { header: 'Group 1' },
-                { name: 'Sandra Adams', group: 'Group 1', avatar: srcs[1] },
-                { name: 'Ali Connors', group: 'Group 1', avatar: srcs[2] },
-                { name: 'Trevor Hansen', group: 'Group 1', avatar: srcs[3] },
-                { name: 'Tucker Smith', group: 'Group 1', avatar: srcs[2] },
-                { divider: true },
-                { header: 'Group 2' },
-                { name: 'Britta Holt', group: 'Group 2', avatar: srcs[4] },
-                { name: 'Jane Smith ', group: 'Group 2', avatar: srcs[5] },
-                { name: 'John Smith', group: 'Group 2', avatar: srcs[1] },
-                { name: 'Sandra Williams', group: 'Group 2', avatar: srcs[3] },
+                { header: 'Օգտատերեր' },
             ],
-            title: 'The summer breeze',
-            //
             addUserGroupDialog: false,
             dialog: false,
             deleteDialog: false,
@@ -366,7 +302,7 @@ export default {
             notifications: false,
             sound: true,
             widgets: false,
-            userData: [],
+            groupsData: [],
             search: '',
             singleSelect: false,
             selected: [],
@@ -382,125 +318,95 @@ export default {
                     href: '',
                 },
             ],
-            headers: [
-                {
-                    text: 'Dessert (100g serving)',
-                    align: 'start',
-                    sortable: false,
-                    value: 'name',
-                },
-                { text: 'Calories', value: 'calories' },
-                { text: 'Fat (g)', value: 'fat' },
-                { text: 'Carbs (g)', value: 'carbs' },
-                { text: 'Protein (g)', value: 'protein' },
-                { text: 'Iron (%)', value: 'iron' },
-            ],
-            desserts: [
-                {
-                    name: 'Frozen Yogurt',
-                    calories: 159,
-                    fat: 6.0,
-                    carbs: 24,
-                    protein: 4.0,
-                    iron: '1%',
-                },
-                {
-                    name: 'Ice cream sandwich',
-                    calories: 237,
-                    fat: 9.0,
-                    carbs: 37,
-                    protein: 4.3,
-                    iron: '1%',
-                },
-                {
-                    name: 'Eclair',
-                    calories: 262,
-                    fat: 16.0,
-                    carbs: 23,
-                    protein: 6.0,
-                    iron: '7%',
-                },
-                {
-                    name: 'Cupcake',
-                    calories: 305,
-                    fat: 3.7,
-                    carbs: 67,
-                    protein: 4.3,
-                    iron: '8%',
-                },
-                {
-                    name: 'Gingerbread',
-                    calories: 356,
-                    fat: 16.0,
-                    carbs: 49,
-                    protein: 3.9,
-                    iron: '16%',
-                },
-                {
-                    name: 'Jelly bean',
-                    calories: 375,
-                    fat: 0.0,
-                    carbs: 94,
-                    protein: 0.0,
-                    iron: '0%',
-                },
-                {
-                    name: 'Lollipop',
-                    calories: 392,
-                    fat: 0.2,
-                    carbs: 98,
-                    protein: 0,
-                    iron: '2%',
-                },
-                {
-                    name: 'Honeycomb',
-                    calories: 408,
-                    fat: 3.2,
-                    carbs: 87,
-                    protein: 6.5,
-                    iron: '45%',
-                },
-                {
-                    name: 'Donut',
-                    calories: 452,
-                    fat: 25.0,
-                    carbs: 51,
-                    protein: 4.9,
-                    iron: '22%',
-                },
-                {
-                    name: 'KitKat',
-                    calories: 518,
-                    fat: 26.0,
-                    carbs: 65,
-                    protein: 7,
-                    iron: '6%',
-                },
-            ],
         }
     },
     async created() {
-        await this.getUsers()
+        await this.getGroups()
     },
     methods: {
         remove (item) {
-            const index = this.friends.indexOf(item.name)
-            if (index >= 0) this.friends.splice(index, 1)
+            const index = this.contacts.indexOf(item.id)
+            if (index >= 0) this.contacts.splice(index, 1)
         },
-        openDialog(id){
-            console.log(id)
-        },
-        async getUsers() {
-           await axios.get(`/api/get-users`)
+        async getGroups() {
+           await axios.post(`/api/get-groups`)
                 .then(response => {
-                    this.userData = response.data.users
+                    this.groupsData = response.data.groups
                 })
                 .catch(e => {
                     console.log(e)
                 })
         },
-        updateList() {
-            this.getUsers()
+        async createGroup() {
+            await axios.post(`/api/create-group`, this.defaultDataGroup)
+                .then(response => {
+                    this.$notify({
+                        group: 'auth',
+                        type: 'success',
+                        text: '<i class="fa fa-check-circle" aria-hidden="true"></i> Խումբը ավելացվել է',
+                        duration: 1000,
+                        speed: 1000
+                    })
+                    this.getGroups()
+                    this.addGroupsDialog = false
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+        },
+        deleteGroupDialog(id) {
+            this.groupId = id
+            this.deleteDialog = true
+        },
+        async deleteGroup() {
+            await axios.post(`/api/delete-group`, {id:this.groupId})
+                .then(response => {
+                    this.$notify({
+                        group: 'auth',
+                        type: 'success',
+                        text: '<i class="fa fa-check-circle" aria-hidden="true"></i> Խումբը ջնջված է',
+                        duration: 1000,
+                        speed: 1000
+                    })
+                    this.getGroups()
+                    this.deleteDialog = false
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+        },
+        async getAllContacts() {
+            await axios.get(`/api/get-contacts`)
+                .then(response => {
+                    this.people = response.data.contacts
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+        },
+        async addContactGroup() {
+            const formData = new FormData()
+            formData.append('contacts', this.contacts)
+            formData.append('group_id', this.groupId)
+
+            await axios.post(`/api/add-contact-group`, formData)
+                .then(response => {
+                    this.$notify({
+                        group: 'auth',
+                        type: 'success',
+                        text: '<i class="fa fa-check-circle" aria-hidden="true"></i> Օգտատերերը ավելացվել են Խմբում',
+                        duration: 1000,
+                        speed: 1000
+                    })
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+        },
+        addContactDialog(id) {
+            this.getAllContacts()
+            this.groupId = id
+            this.addUserGroupDialog = true
         }
     }
 }
@@ -577,6 +483,10 @@ export default {
                         display: flex;
                         justify-content: space-between;
                         margin: 0 0 15px;
+                        .group-title {
+                            width: 50%;
+                            word-break: break-word;
+                        }
                     }
                     .group-count {
                         margin: 0 0 20px;

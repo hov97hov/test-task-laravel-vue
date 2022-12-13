@@ -7,7 +7,9 @@ import { App as InertiaApp, plugin as InertiaPlugin } from '@inertiajs/inertia-v
 import Vuetify from "vuetify";
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css'
+import Notifications from 'vue-notification'
 
+Vue.use(Notifications)
 Vue.use(InertiaPlugin);
 Vue.use(Vuetify);
 
